@@ -45,29 +45,18 @@ function req(method, uri, body, opts) {
 
     opts.headers = Object.assign(opts.headers, authenticate(this, opts.method, uri, body));
 
-    //console.log('REQUEST Headers:');
-    //console.dir(opts.headers);
-
     return new Promise((resolve, reject) => {
         let response_body = "";
         let client = https.request(opts, (res) => {
-            try {
-                //console.debug(`DEBUG ${my_url.href} statusCode: ${res.statusCode}`);
-                //console.debug(`DEBUG ${my_url.href} headers: `);
-                //console.dir(res);
-              
+            try {              
                 res.on('data', (d) => {
                     response_body += d;
                 });
                 
-                ///////////
                 res.on('end', () => {
-                    //console.log(`DEBUG ${my_url.href} complete. Body: ${response_body}`);
                     try {
                         let result = response_body;
                         if (res.statusCode >= 200 && res.statusCode <= 299) {
-                            //console.log(`PASS: ${my_url.href}`);
-                            //console.log(`DEBUG: body: ${body}`);
                             if (res.headers["content-type"] === 'application/json') {
                                 result = JSON.parse(response_body);
                             }
@@ -88,7 +77,6 @@ function req(method, uri, body, opts) {
                         reject(err, response_body, res);
                     }
                 });
-                ///////////
             }
             catch (ex) {
                 console.error("ERROR in https request", ex);
@@ -100,20 +88,10 @@ function req(method, uri, body, opts) {
             reject(e);
         });
         if (body && body.length) {
-            //console.log(`DEBUG: SEND: ${body}`);
             client.write(body);
         }
         client.end();
     });
-
-    return request(Object.assign(Object.create(null), opts, {
-        body: body,
-        headers: authenticate(this, { body: body, method: method, uri: uri }),
-        json: true,
-        method: method,
-        uri: uri,
-        timeout: this.options.timeout
-    }), callback);
 }
 
 Chef.prototype.request = function request(method, uri, body, opts) {
