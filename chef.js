@@ -6,7 +6,10 @@ const methods = ['delete', 'get', 'post', 'put'];
 
 function Chef(user, key, options) {
     this.user = user;
-    this.key = key;
+    this.key = {
+        key: key,
+        passphrase: 'changeme'
+    };
 
     options = options || {};
     options.version = options.version || '12.8.0';
@@ -49,9 +52,9 @@ function req(method, uri, body, opts) {
         let response_body = "";
         let client = https.request(opts, (res) => {
             try {
-                //console.log(`DEBUG ${my_url.href} statusCode: ${res.statusCode}`);
-                //console.log(`DEBUG ${my_url.href} headers: `);
-                //console.dir(res.headers);
+                //console.debug(`DEBUG ${my_url.href} statusCode: ${res.statusCode}`);
+                //console.debug(`DEBUG ${my_url.href} headers: `);
+                //console.dir(res);
               
                 res.on('data', (d) => {
                     response_body += d;
@@ -68,7 +71,13 @@ function req(method, uri, body, opts) {
                             if (res.headers["content-type"] === 'application/json') {
                                 result = JSON.parse(response_body);
                             }
-                            resolve(result, response_body, res);
+                            resolve({
+                                data: result,
+                                body: response_body,
+                                url: my_url,
+                                requst: client,
+                                response: res
+                            });
                         }
                         else {
                             console.warn(`FAIL: ${my_url.href} HTTP ${res.statusCode}`);
@@ -107,9 +116,15 @@ function req(method, uri, body, opts) {
     }), callback);
 }
 
+Chef.prototype.request = function request(method, uri, body, opts) {
+    return req.call(this, method, uri, body, opts);
+}
+
 methods.forEach(function (method) {
-    Chef.prototype[method] = function (uri, body, opts, callback) {
-        return req.call(this, method, uri, body, opts, callback);
+    Chef.prototype[method] = function (uri, body, opts) {
+        return req.call(this, method, uri, body, opts).then((result) => {
+            return result.data;
+        });
     };
 });
 
