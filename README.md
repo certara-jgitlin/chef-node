@@ -1,15 +1,28 @@
 # chef-node
 
 [![NPM version](https://badge.fury.io/js/chef.png)](http://badge.fury.io/js/chef)
-[![Build Status](https://travis-ci.org/sgentle/chef-node.png)](https://travis-ci.org/sgentle/chef-node)
-[![Code Climate](https://codeclimate.com/github/sgentle/chef-node.png)](https://codeclimate.com/github/sgentle/chef-node)
+[![Build Status](https://travis-ci.org/sgentle/chef-node.png)](https://travis-ci.org/certara-jgitlin/chef-node)
+[![Code Climate](https://codeclimate.com/github/sgentle/chef-node.png)](https://codeclimate.com/github/certara-jgitlin/chef-node)
 
 A simple [Chef](http://www.opscode.com/chef/) client for Node.js. Handles the
 authentication so you can get on with Cheffing.
 
+Works with Cinc Server as well as Chef Server.
+
 ## Install
 
     npm install chef
+
+## Changes in 1.0.0
+
+Starting with major version 1.x, this module has been taken over by [Josh Gitlin](https://github.com/certara-jgitlin).
+
+The code has been modernized which has a number of breaking changes: The old `request` module is no longer used,
+and the Chef client **now uses Promises instead of callbacks**. That means that if you were on a `0.x` version
+previously, you will need to re-write your code when moving to 1.0.0 or later.
+
+Previously, `client.put`, `client.get`, etc took a callback as the final argument. Now, they return a promise
+which you can chain on to with `client.get(...).then(function (result){ /* callback here */ })`
 
 ## Examples
 
@@ -21,20 +34,27 @@ var fs = require('fs'),
     key = fs.readFileSync('/path/to/key.file.pem'),
     client = chef.createClient('username', key, 'http://chef.server.com:4000', '12.8.0');
 
-client.get('/nodes/foo', function(err, res, body) {
-    if (err) { return console.log(err); }
-    body.run_list.push('role[bar]');
-    client.put('/nodes/foo', body, function(err, res, body) {
-        console.log(err ? err : body);
+client.get('/nodes/foo').then(node => {
+    node.run_list.push('role[bar]');
+    client.put('/nodes/foo', node).catch(err => {
+        console.error(err);
     });
-});
+}).catch(err => { console.error(err); });
 ```
 
 ## Methods
 
 The `client` object supports `delete`, `get`, `post` and `put` methods
 and accepts relative and absolute URLs (so you can use URLs returned in
-responses.)
+responses.) All methods return a Promise which resolves with the 
+deserialized JSON from the Chef server.
+
+The `client` object also supports the `req` method, which supports
+passing an arbitrary HTTP verb and HTTP connection options. Unlike
+the methods above, `req` returns an object containing the deserialized
+JSON along with the actual `req` and `res` objects and associated
+metadata (in case you need to access the HTTP status code or other
+underlying properties)
 
 ## Self Signed Certs
 
@@ -46,7 +66,11 @@ If you need to connect to a chef server with a self signed cert, add the followi
 
 The MIT License (MIT)
 
-Copyright (c) 2013 Sam Gentle
+Copyright (c) 2013 Sam Gentle, (c) 2022 Josh Gitlin
+
+The term "Chef" is a trademark of Chef Software, Inc.
+This project is not maintained by Progress/Chef.
+Chef © 2010 - 2022 Chef Software, Inc. All Rights Reserved
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
