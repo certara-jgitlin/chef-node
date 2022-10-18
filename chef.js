@@ -4,11 +4,22 @@ const authenticate = require('./chef/authenticate'),
 
 const methods = ['delete', 'get', 'post', 'put'];
 
+/**
+ * Constructor function for a new Chef client
+ * 
+ * the `key` parameter may be either a string containing the PEM encoded
+ * private key of the user to authenticate with, or an object with two
+ * keys: `key` mapping to the PEM encoded key and `passphrase` mapping
+ * to the passphrase for a password-protected key.
+ * 
+ * @param {string} user - the Chef server username to authenticate as
+ * @param {string|object} key - the PEM encoded text or object with of the user's key and password
+ * @param {object} [options] - object containing API version and timeout
+ */
 function Chef(user, key, options) {
     this.user = user;
-    this.key = {
-        key: key,
-        passphrase: 'changeme'
+    this.key = (typeof key == "object") ? key : {
+        key: key
     };
 
     options = options || {};
