@@ -1,0 +1,5 @@
+{
+    "foo.internal": "https://example.com/organizations/example/nodes/foo.internal",
+    "bar.internal": "https://example.com/organizations/example/nodes/bar.internal",
+    "baz.internal": "https://example.com/organizations/example/nodes/baz.internal"
+}

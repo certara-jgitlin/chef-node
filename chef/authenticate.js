@@ -10,7 +10,7 @@ function sha1(str) {
 
 // Hash the stringified body
 function bodyHash(body) {
-    return sha1(body ? JSON.stringify(body) : '');
+    return sha1(body ? body : '');
 }
 
 // Hash the path of the uri
@@ -26,26 +26,26 @@ function timestamp() {
 // Function used internally to build Chef authentication headers.
 //
 // Takes a client object and an options object. The client object must
-// contain a user and key; the options object must include uri, method,
-// and body.
+// contain a user and key; it may also contain an API version string
 //
 // Returns an object that includes the required headers for
 // authenticating with Chef.
-module.exports = function authenticate(client, options) {
-    var bh = bodyHash(options.body),
-        ph = pathHash(options.uri),
+module.exports = function authenticate(client, method, uri, body) {
+    var bh = bodyHash(body),
+        ph = pathHash(uri),
         ts = timestamp(),
+        method = method,
         user = client.user,
         canonicalReq, headers;
 
-    canonicalReq = 'Method:' + options.method + '\n' +
+    canonicalReq = 'Method:' + method + '\n' +
         'Hashed Path:' + ph + '\n' +
         'X-Ops-Content-Hash:' + bh + '\n' +
         'X-Ops-Timestamp:' + ts + '\n' +
         'X-Ops-UserId:' + user;
 
     headers = {
-        'X-Chef-Version': '11.6.0',
+        'X-Chef-Version': client.version || '12.8.0',
         'X-Ops-Content-Hash': bh,
         'X-Ops-Sign': 'version=1.0',
         'X-Ops-Timestamp': ts,

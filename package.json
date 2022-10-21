@@ -1,20 +1,21 @@
 {
   "name": "chef",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "Access the Opscode Chef Server API from Node",
   "main": "chef.js",
   "dependencies": {
     "request": "~2"
   },
   "devDependencies": {
-    "chai": "~1.7.2",
-    "mocha": "~1.12.1",
-    "nock": "~0.22.1",
-    "sinon": "~1.7.3"
+    "chai": "~4.3.0",
+    "chai-as-promised": "~7.1.1",
+    "mocha": "~10.0.0",
+    "nock": "~13.2.0",
+    "sinon": "~14.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sgentle/chef-node.git"
+    "url": "https://github.com/jgitlin-p21/chef-node.git"
   },
   "keywords": [
     "api",
